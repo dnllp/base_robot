@@ -128,8 +128,8 @@ void readAndPublish(NewPing &sonar, sensor_msgs::Range &range_msg, ros::Publishe
 }
 
 void activaBarredora() {
-  digitalWrite(inAPin, LOW);
-  digitalWrite(inBPin, HIGH);
+  digitalWrite(inAPin, HIGH);
+  digitalWrite(inBPin, LOW);
   analogWrite(pwMPin, 255); // Puedes ajustar la velocidad PWM según sea necesario
 }
 
