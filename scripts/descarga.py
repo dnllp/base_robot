@@ -11,7 +11,7 @@ import numpy as np
 
 class RedDepositController:
     def __init__(self):
-        rospy.init_node('red_deposit_controller')
+        rospy.init_node('Nodo buscador de deposito')
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber('/camera/rear/image_raw', Image, self.image_callback)
         self.mode_sub = rospy.Subscriber('/modo', Int8, self.mode_callback)
@@ -39,7 +39,7 @@ class RedDepositController:
     def mode_callback(self, msg):
         self.current_mode = msg.data
         if self.current_mode == 3:
-            rospy.loginfo("Red deposit controller activated.")
+            rospy.loginfo("Buscador de deposito Rojo activado.")
             self.deposit_centered = False
             self.approaching = False
 
@@ -56,7 +56,7 @@ class RedDepositController:
             # Make a copy for visualization (comment out if not needed)
             visualization_image = cv_image.copy()
         except Exception as e:
-            rospy.logerr("Error converting image: %s", str(e))
+            rospy.logerr("Error convirtiendo imagen: %s", str(e))
             return
 
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
@@ -92,7 +92,7 @@ class RedDepositController:
                             twist.angular.z = 0.0
                             twist.linear.x = 0.0
                             self.deposit_centered = True
-                            rospy.loginfo("Red deposit centered.")
+                            rospy.loginfo("Deposito rojo centrado.")
                             self.approaching = True
                     elif self.approaching:
                         if self.current_distance is not None:
@@ -103,19 +103,19 @@ class RedDepositController:
                                 twist.linear.x = 0.0
                                 twist.angular.z = 0.0
                                 descarga_msg.data = True
-                                rospy.loginfo("Reached deposit. Initiating descarga.")
+                                rospy.loginfo("Deposito ubicado. Iniciando descarga.")
                                 self.descarga_pub.publish(descarga_msg)
                                 #rospy.sleep(5) # Simulate descarga
                                 mode_msg = Int8()
                                 mode_msg.data = 2
                                 rospy.Publisher('/modo', Int8, queue_size=1).publish(mode_msg)
-                                rospy.loginfo("Descarga complete. Setting mode to 2.")
+                                rospy.loginfo("Descarga completa. Cambiando modo a Busqueda (2).")
                                 self.current_mode = 2
                                 self.deposit_centered = False
                                 self.approaching = False
                                 
                         else:
-                            rospy.logwarn_once("Waiting for distance data on /distancia")
+                            rospy.logwarn_once("Esperando la distancia al deposito /distancia")
                             twist.linear.x = 0.0
                             twist.angular.z = 0.0
                     # Draw the contour and center (comment out if not needed)
@@ -134,7 +134,7 @@ class RedDepositController:
         self.descarga_pub.publish(descarga_msg)
 
         # Display the image with detection (comment out the entire block if not needed)
-        window_name = "Red Deposit Detection"
+        window_name = "Deteccion del Deposito Rojo"
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         if 'visualization_image' in locals():
             cv2.imshow(window_name, visualization_image)

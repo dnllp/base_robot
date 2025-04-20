@@ -11,7 +11,7 @@ import numpy as np
 
 class BlackCanDetector:
     def __init__(self):
-        rospy.init_node('black_can_controller')
+        rospy.init_node('Nodo de Busqueda')
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber('/camera/front/image_raw', Image, self.image_callback)
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)

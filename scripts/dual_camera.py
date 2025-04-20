@@ -50,6 +50,7 @@ class CSI_Camera:
     def start(self):
         if self.running:
             print('Video capturing is already running')
+            rospy.loginfo("Captura de video esta ejecutandose")
             return None
         # create a thread to read the camera image
         if self.video_capture != None:
@@ -122,7 +123,7 @@ def gstreamer_pipeline(
     )
 
 def run_cameras():
-    rospy.init_node('dual_camera_publisher')
+    rospy.init_node('Nodo de Camaras')
     bridge = CvBridge()
 
     front_topic = rospy.get_param('~front_camera_topic', '/camera/front/image_raw')
