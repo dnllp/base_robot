@@ -1,0 +1,5 @@
+# Petición (puede estar vacía)
+---
+# Respuesta
+bool lata_encontrada
+float64 centro_x # Centro x de la lata encontrada (-1 si no encontrada)

@@ -7,10 +7,69 @@ project(base_robot)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
+##find_package(catkin REQUIRED COMPONENTS
+ ## roscpp
+ ## rospy
+##  std_msgs
+##)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  sensor_msgs
+  geometry_msgs
+  cv_bridge
+  message_generation
+)
+
+add_service_files(
+  FILES
+  BuscarDescargar.srv
+  BuscarLata.srv
+  EvadirObstaculo.srv # Agrega tu nuevo servicio aquí
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  sensor_msgs
+  geometry_msgs
+)
+
+catkin_package(
+  CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs geometry_msgs cv_bridge message_runtime
+  # DEPENDS system dependencies
+  # LIBRARIES mi_robot
+  # CATKIN_EXPORTED_LIBRARIES mi_robot
+)
+
+install(DIRECTORY srv
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srv
+  FILES_MATCHING REGEX ".*\.srv$"
+  PATTERN ".svn" EXCLUDE
+)
+
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+  FILES_MATCHING REGEX ".*\.launch$"
+  PATTERN ".svn" EXCLUDE
+)
+
+install(DIRECTORY rviz
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/rviz
+  FILES_MATCHING REGEX ".*\.rviz$"
+  PATTERN ".svn" EXCLUDE
+)
+
+install(FILES
+  src/red_deposit_service.py
+  src/black_can_service.py
+  src/obstacle_avoidance_service.py # Agrega tu nuevo nodo de servicio
+  src/state_machine.py
+  DESTINATION ${CATKIN_PACKAGE_PACKAGE_DESTINATION}/nodes
+  PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
 )
 
 ## System dependencies are found with CMake's conventions

@@ -1,0 +1,5 @@
+# Petición (puede estar vacía, ya que la acción siempre es la misma)
+---
+# Respuesta
+bool exito
+string mensaje

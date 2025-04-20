@@ -1,0 +1,5 @@
+# Petición (puede incluir información adicional sobre la dirección preferida, etc.)
+---
+# Respuesta
+bool obstaculo_evadido
+string mensaje
