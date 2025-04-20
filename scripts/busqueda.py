@@ -4,6 +4,7 @@
 import rospy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Bool, Int8, Float32
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
@@ -13,6 +14,7 @@ class BlackCanDetector:
         rospy.init_node('black_can_controller')
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber('/camera/front/image_raw', Image, self.image_callback)
+        self.mode_sub = rospy.Subscriber('/modo', Int8, self.mode_callback)
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.lower_black = np.array([0, 0, 0])
         self.upper_black = np.array([180, 255, 30]) # Adjust upper bound as needed
@@ -20,8 +22,16 @@ class BlackCanDetector:
         self.image_width = 640.0 # Default, will be updated in callback (as float for calculations)
         self.angular_speed = 4.0 # Adjust for desired rotation speed
         self.centering_threshold = 0.1 # Percentage of image width to consider centered
+        self.current_mode = 0
+
+    def mode_callback(self, msg):
+        self.current_mode = msg.data
+        if self.current_mode == 2:
+            rospy.loginfo("Buscador de latas activado.")
 
     def image_callback(self, msg):
+        if self.current_mode != 2:
+            return
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
             self.image_width = float(cv_image.shape[1])
@@ -68,7 +78,7 @@ class BlackCanDetector:
         self.cmd_vel_pub.publish(twist)
 
         # Display the image with detection (comment out the entire block if not needed)
-        window_name = "Black Can Detection"
+        window_name = "Detección de Latas"
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         if 'visualization_image' in locals():
             cv2.imshow(window_name, visualization_image)
