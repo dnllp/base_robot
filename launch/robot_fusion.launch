@@ -1,0 +1,11 @@
+<launch>
+  <node pkg="base_robot" type="robot_diff_ros_ekf.py" name="differential_robot_fusion" output="screen">
+    <param name="wheel_radius" value="0.065"/>
+    <param name="wheel_base" value="0.42"/>
+    <param name="encoder_ticks" value="341"/>
+  </node>
+
+  <node pkg="robot_localization" type="ekf_node" name="ekf_localization" output="screen">
+    <rosparam command="load" file="$(find base_robot)/config/ekf_params.yaml"/>
+  </node>
+</launch>
