@@ -1,6 +1,7 @@
 #include <NewPing.h>
 #include <ros.h>
 #include <sensor_msgs/Range.h>
+#include <std_msgs/String.h> // Incluimos String para un posible mensaje de debug
 
 // Definición de pines para sensores ultrasónicos
 #define FRONT_LEFT_TRIG 29
@@ -30,15 +31,18 @@ ros::Publisher pub_front_right("/ultrasonic/front_right", &front_right_range);
 ros::Publisher pub_rear_left("/ultrasonic/rear_left", &rear_left_range);
 ros::Publisher pub_rear_right("/ultrasonic/rear_right", &rear_right_range);
 ros::Publisher pub_rear_low("/distancia", &rear_low_range);
+
 // Objetos NewPing para cada sensor
 NewPing sonar_front_left(FRONT_LEFT_TRIG, FRONT_LEFT_ECHO, 200); // Distancia máxima 200cm
 NewPing sonar_front_right(FRONT_RIGHT_TRIG, FRONT_RIGHT_ECHO, 200);
 NewPing sonar_rear_left(REAR_LEFT_TRIG, REAR_LEFT_ECHO, 200);
 NewPing sonar_rear_right(REAR_RIGHT_TRIG, REAR_RIGHT_ECHO, 200);
 NewPing sonar_rear_low(REAR_LOW_TRIG, REAR_LOW_ECHO, 200);
+
 // Variables para temporización no bloqueante
 unsigned long previousMillis = 0;
 const long interval = 50;  // Intervalo de 50ms (20Hz)
+
 void setup() {
   // Inicializar ROS
   nh.initNode();
@@ -47,28 +51,35 @@ void setup() {
   nh.advertise(pub_rear_left);
   nh.advertise(pub_rear_right);
   nh.advertise(pub_rear_low);
-  // Configurar mensajes Range
+
+  // Configurar mensajes Range con valores iniciales (opcional pero útil)
   setupRangeMessage(front_left_range, "front_left");
   setupRangeMessage(front_right_range, "front_right");
   setupRangeMessage(rear_left_range, "rear_left");
   setupRangeMessage(rear_right_range, "rear_right");
   setupRangeMessage(rear_low_range, "rear_low");
+
+  //Serial.begin(115200); // Inicializar Serial para debugging
+  //Serial.println("Nodo ROS de ultrasonidos inicializado.");
 }
 
 void loop() {
-    unsigned long currentMillis = millis();
+  unsigned long currentMillis = millis();
 
-    // Lectura y publicación de sensores ultrasónicos cada 50ms
-    if (currentMillis - previousMillis >= interval) {
-      previousMillis = currentMillis;// Leer y publicar datos de cada sensor
-  readAndPublish(sonar_front_left, front_left_range, pub_front_left);
-  readAndPublish(sonar_front_right, front_right_range, pub_front_right);
-  readAndPublish(sonar_rear_left, rear_left_range, pub_rear_left);
-  readAndPublish(sonar_rear_right, rear_right_range, pub_rear_right);
-  readAndPublish(sonar_rear_low, rear_low_range, pub_rear_low);
-    }
+  // Lectura y publicación de sensores ultrasónicos cada 50ms
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis; // Actualizar el tiempo anterior
+
+    // Leer y publicar datos de cada sensor
+    readAndPublish(sonar_front_left, front_left_range, pub_front_left);
+    readAndPublish(sonar_front_right, front_right_range, pub_front_right);
+    readAndPublish(sonar_rear_left, rear_left_range, pub_rear_left);
+    readAndPublish(sonar_rear_right, rear_right_range, pub_rear_right);
+    readAndPublish(sonar_rear_low, rear_low_range, pub_rear_low);
+  }
+
   nh.spinOnce();
-  delayMicroseconds(100); 
+  delayMicroseconds(100);
 }
 
 void setupRangeMessage(sensor_msgs::Range &range_msg, const char *frame_id) {
@@ -80,7 +91,12 @@ void setupRangeMessage(sensor_msgs::Range &range_msg, const char *frame_id) {
 }
 
 void readAndPublish(NewPing &sonar, sensor_msgs::Range &range_msg, ros::Publisher &publisher) {
-  range_msg.range = sonar.ping_cm() / 100.0; // Convertir a metros
+  unsigned int cm = sonar.ping_cm();
+  range_msg.range = cm / 100.0; // Convertir a metros
   range_msg.header.stamp = nh.now();
   publisher.publish(&range_msg);
+  //Serial.print("Publicando en ");
+  //Serial.print(publisher.getTopic());
+ // Serial.print(": ");
+  //Serial.println(range_msg.range);
 }
