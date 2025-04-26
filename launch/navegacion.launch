@@ -3,7 +3,7 @@
   <include file="$(find ydlidar_ros_driver)/launch/X4.launch"/>
   
   <!-- Nodo de evasión de obstáculos -->
-  <node name="obstacle_avoidance" pkg="base_robot" type="obstacle_avoidance.py" output="screen">
+  <node name="obstacle_avoidance" pkg="base_robot" type="evasor.py" output="screen">
     <param name="safe_distance" value="0.5"/>
     <param name="max_speed" value="0.3"/>
     <param name="max_turn" value="1.0"/>
