@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import rospy
 import math
 from std_msgs.msg import Int32MultiArray, String
@@ -12,7 +13,7 @@ class DifferentialRobotFusion:
     def __init__(self):
         rospy.init_node('differential_robot_fusion_node')
 
-        # Parámetros del robot
+        # Parametros del robot
         self.wheel_radius = rospy.get_param('~wheel_radius', 0.065)
         self.wheel_base = rospy.get_param('~wheel_base', 0.42)
         self.encoder_ticks_per_rev = rospy.get_param('~encoder_ticks', 341)
@@ -22,7 +23,7 @@ class DifferentialRobotFusion:
         # Publicador para comandos de velocidad al Arduino
         self.cmd_vel_pub_arduino = rospy.Publisher('/cmd_vel', String, queue_size=10)
 
-        # Publicador para la odometría basada en encoders (para robot_localization)
+        # Publicador para la odometria basada en encoders (para robot_localization)
         self.encoder_odom_pub = rospy.Publisher('encoder_odom', Odometry, queue_size=10)
 
         # Suscriptores
@@ -73,7 +74,7 @@ class DifferentialRobotFusion:
             self.y += linear_displacement * math.sin(self.theta)
             self.last_time = current_time
 
-            # Publicar la odometría del encoder
+            # Publicar la odometria del encoder
             encoder_odom = Odometry()
             encoder_odom.header.stamp = current_time
             encoder_odom.header.frame_id = "odom_encoder"  # Un frame ID diferente
