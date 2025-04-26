@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   geometry_msgs
-  cv_bridge
+  #cv_bridge
   message_generation
 )
 
@@ -47,19 +47,19 @@ catkin_package(
 
 install(DIRECTORY srv
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srv
-  FILES_MATCHING REGEX ".*\.srv$"
+  FILES_MATCHING REGEX ".*\\.srv$"
   PATTERN ".svn" EXCLUDE
 )
 
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-  FILES_MATCHING REGEX ".*\.launch$"
+  FILES_MATCHING REGEX ".*\\.launch$"
   PATTERN ".svn" EXCLUDE
 )
 
 install(DIRECTORY rviz
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/rviz
-  FILES_MATCHING REGEX ".*\.rviz$"
+  FILES_MATCHING REGEX ".*\\.rviz$"
   PATTERN ".svn" EXCLUDE
 )
 
