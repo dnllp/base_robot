@@ -105,190 +105,190 @@ const unsigned long publish_interval = 20; // 50Hz
 
 void setup() {
 Serial.begin(57600);
- nh.initNode();
+nh.initNode();
 
- // --- Publicidad de tópicos ---
- nh.advertise(imu_pub);
- nh.advertise(encoder_pub);
- nh.advertise(pub_front_left);
- nh.advertise(pub_front_right);
- nh.advertise(pub_rear_left);
- nh.advertise(pub_rear_right);
- nh.advertise(pub_rear_low);
+// --- Publicidad de tópicos ---
+nh.advertise(imu_pub);
+nh.advertise(encoder_pub);
+nh.advertise(pub_front_left);
+nh.advertise(pub_front_right);
+nh.advertise(pub_rear_left);
+nh.advertise(pub_rear_right);
+nh.advertise(pub_rear_low);
 
- // --- Suscripción a tópicos ---
- nh.subscribe(vel_sub);
- nh.subscribe(sub_barredora);
+// --- Suscripción a tópicos ---
+nh.subscribe(vel_sub);
+nh.subscribe(sub_barredora);
 
- // --- Configuración de pines de motor ---
- pinMode(MOTOR_LEFT_PWM1, OUTPUT);
- pinMode(MOTOR_LEFT_PWM2, OUTPUT);
- pinMode(MOTOR_RIGHT_PWM1, OUTPUT);
- pinMode(MOTOR_RIGHT_PWM2, OUTPUT);
+// --- Configuración de pines de motor ---
+pinMode(MOTOR_LEFT_PWM1, OUTPUT);
+pinMode(MOTOR_LEFT_PWM2, OUTPUT);
+pinMode(MOTOR_RIGHT_PWM1, OUTPUT);
+pinMode(MOTOR_RIGHT_PWM2, OUTPUT);
 
- // --- Inicialización de encoders ---
- pinMode(ENCODER_LEFT_A, INPUT_PULLUP);
- pinMode(ENCODER_LEFT_B, INPUT_PULLUP);
- pinMode(ENCODER_RIGHT_A, INPUT_PULLUP);
- pinMode(ENCODER_RIGHT_B, INPUT_PULLUP);
- attachInterrupt(digitalPinToInterrupt(ENCODER_LEFT_A), handleLeftEncoder, CHANGE);
- attachInterrupt(digitalPinToInterrupt(ENCODER_RIGHT_A), handleRightEncoder, CHANGE);
+// --- Inicialización de encoders ---
+pinMode(ENCODER_LEFT_A, INPUT_PULLUP);
+pinMode(ENCODER_LEFT_B, INPUT_PULLUP);
+pinMode(ENCODER_RIGHT_A, INPUT_PULLUP);
+pinMode(ENCODER_RIGHT_B, INPUT_PULLUP);
+attachInterrupt(digitalPinToInterrupt(ENCODER_LEFT_A), handleLeftEncoder, CHANGE);
+attachInterrupt(digitalPinToInterrupt(ENCODER_RIGHT_A), handleRightEncoder, CHANGE);
 
- // --- Inicialización de IMU ---
- if(!bno.begin()) {
-  Serial.println("Error al iniciar BNO055");
-  while(1);
- }
- delay(1000);
- bno.setExtCrystalUse(true);
+// --- Inicialización de IMU ---
+if(!bno.begin()) {
+Serial.println("Error al iniciar BNO055");
+while(1);
+}
+delay(1000);
+bno.setExtCrystalUse(true);
 
- // --- Inicialización del array del encoder message ---
- encoder_msg.data = (int32_t*)malloc(sizeof(int32_t) * 2);
- encoder_msg.data_length = 2;
+// --- Inicialización del array del encoder message ---
+encoder_msg.data = (int32_t*)malloc(sizeof(int32_t) * 2);
+encoder_msg.data_length = 2;
 
- // --- Configuración de mensajes Range ---
- setupRangeMessage(front_left_range, "front_left");
- setupRangeMessage(front_right_range, "front_right");
- setupRangeMessage(rear_left_range, "rear_left");
- setupRangeMessage(rear_right_range, "rear_right");
- setupRangeMessage(rear_low_range, "rear_low");
+// --- Configuración de mensajes Range ---
+setupRangeMessage(front_left_range, "front_left");
+setupRangeMessage(front_right_range, "front_right");
+setupRangeMessage(rear_left_range, "rear_left");
+setupRangeMessage(rear_right_range, "rear_right");
+setupRangeMessage(rear_low_range, "rear_low");
 
- // --- Configuración de pines de la barredora ---
- pinMode(inAPin, OUTPUT);
- pinMode(inBPin, OUTPUT);
- pinMode(pwMPin, OUTPUT);
- desactivaBarredora(); // Asegurar que la barredora comience desactivada
+// --- Configuración de pines de la barredora ---
+pinMode(inAPin, OUTPUT);
+pinMode(inBPin, OUTPUT);
+pinMode(pwMPin, OUTPUT);
+desactivaBarredora(); // Asegurar que la barredora comience desactivada
 
- Serial.println("Arduino Mega - Nodo ROS Integrado");
+Serial.println("Arduino Mega - Nodo ROS Integrado");
+}
+void publishSensorData();
+void loop() {
+unsigned long currentMillis = millis();
+
+// --- Publicar datos de sensores periódicamente ---
+if(currentMillis - last_publish_time >= publish_interval) {
+publishSensorData();
+last_publish_time = currentMillis;
 }
 
-void loop() {
- unsigned long currentMillis = millis();
+// --- Lectura y publicación de sensores ultrasónicos ---
+if (currentMillis - previousMillisUltrasonic >= intervalUltrasonic) {
+previousMillisUltrasonic = currentMillis;
+readAndPublishUltrasonic(sonar_front_left, front_left_range, pub_front_left);
+readAndPublishUltrasonic(sonar_front_right, front_right_range, pub_front_right);
+readAndPublishUltrasonic(sonar_rear_left, rear_left_range, pub_rear_left);
+readAndPublishUltrasonic(sonar_rear_right, rear_right_range, pub_rear_right);
+readAndPublishUltrasonic(sonar_rear_low, rear_low_range, pub_rear_low);
+}
 
- // --- Publicar datos de sensores periódicamente ---
- if(currentMillis - last_publish_time >= publish_interval) {
-  publishSensorData();
-  last_publish_time = currentMillis;
- }
-
- // --- Lectura y publicación de sensores ultrasónicos ---
- if (currentMillis - previousMillisUltrasonic >= intervalUltrasonic) {
-  previousMillisUltrasonic = currentMillis;
-  readAndPublishUltrasonic(sonar_front_left, front_left_range, pub_front_left);
-  readAndPublishUltrasonic(sonar_front_right, front_right_range, pub_front_right);
-  readAndPublishUltrasonic(sonar_rear_left, rear_left_range, pub_rear_left);
-  readAndPublishUltrasonic(sonar_rear_right, rear_right_range, pub_rear_right);
-  readAndPublishUltrasonic(sonar_rear_low, rear_low_range, pub_rear_low);
- }
-
- nh.spinOnce();
- delayMicroseconds(100);
+nh.spinOnce();
+delayMicroseconds(100);
 }
 
 void publishSensorData() {
- // --- Leer IMU ---
- imu::Quaternion quat = bno.getQuat();
- imu::Vector(float) linear_acceleration = bno.getLinearAccel();
- imu::Vector(float) angular_velocity = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+// --- Leer IMU ---
+imu::Quaternion quat = bno.getQuat();
+imu::Vector(float) linear_acceleration = bno.getLinearAccel();
+imu::Vector(float) angular_velocity = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
 
- // --- Llenar el mensaje IMU ---
- imu_msg.header.stamp = nh.now();
- imu_msg.header.frame_id = "imu_frame";
- imu_msg.orientation.x = quat.x();
- imu_msg.orientation.y = quat.y();
- imu_msg.orientation.z = quat.z();
- imu_msg.orientation.w = quat.w();
- for (int i = 0; i < 9; i++) {
-  imu_msg.orientation_covariance[i] = 0.0;
-  imu_msg.angular_velocity_covariance[i] = 0.0;
-  imu_msg.linear_acceleration_covariance[i] = 0.0;
- }
- imu_msg.angular_velocity.x = angular_velocity.x();
- imu_msg.angular_velocity.y = angular_velocity.y();
- imu_msg.angular_velocity.z = angular_velocity.z();
- imu_msg.linear_acceleration.x = linear_acceleration.x();
- imu_msg.linear_acceleration.y = linear_acceleration.y();
- imu_msg.linear_acceleration.z = linear_acceleration.z();
- imu_pub.publish(&imu_msg);
+// --- Llenar el mensaje IMU ---
+imu_msg.header.stamp = nh.now();
+imu_msg.header.frame_id = "imu_frame";
+imu_msg.orientation.x = quat.x();
+imu_msg.orientation.y = quat.y();
+imu_msg.orientation.z = quat.z();
+imu_msg.orientation.w = quat.w();
+for (int i = 0; i < 9; i++) {
+imu_msg.orientation_covariance[i] = 0.0;
+imu_msg.angular_velocity_covariance[i] = 0.0;
+imu_msg.linear_acceleration_covariance[i] = 0.0;
+}
+imu_msg.angular_velocity.x = angular_velocity.x();
+imu_msg.angular_velocity.y = angular_velocity.y();
+imu_msg.angular_velocity.z = angular_velocity.z();
+imu_msg.linear_acceleration.x = linear_acceleration.x();
+imu_msg.linear_acceleration.y = linear_acceleration.y();
+imu_msg.linear_acceleration.z = linear_acceleration.z();
+imu_pub.publish(&imu_msg);
 
- // --- Calcular y publicar datos del encoder ---
- long delta_left = left_ticks - prev_left_ticks;
- long delta_right = right_ticks - prev_right_ticks;
- prev_left_ticks = left_ticks;
- prev_right_ticks = right_ticks;
- encoder_msg.data[0] = delta_left;
- encoder_msg.data[1] = delta_right;
- encoder_pub.publish(&encoder_msg);
+// --- Calcular y publicar datos del encoder ---
+long delta_left = left_ticks - prev_left_ticks;
+long delta_right = right_ticks - prev_right_ticks;
+prev_left_ticks = left_ticks;
+prev_right_ticks = right_ticks;
+encoder_msg.data[0] = delta_left;
+encoder_msg.data[1] = delta_right;
+encoder_pub.publish(&encoder_msg);
 }
 
 void velocity_cb(const geometry_msgs::Twist& twist_msg) {
- linear_x = twist_msg.linear.x;
- angular_z = twist_msg.angular.z;
- float wheel_radius = 0.05;
- float wheel_separation = 0.2;
- float left_vel = (linear_x - (angular_z * wheel_separation / 2.0)) / wheel_radius;
- float right_vel = (linear_x + (angular_z * wheel_separation / 2.0)) / wheel_radius;
- int left_pwm = map(left_vel * 100, -255, 255, -255, 255);
- int right_pwm = map(right_vel * 100, -255, 255, -255, 255);
- setMotorSpeed(MOTOR_LEFT_PWM1, MOTOR_LEFT_PWM2, left_pwm);
- setMotorSpeed(MOTOR_RIGHT_PWM1, MOTOR_RIGHT_PWM2, right_pwm);
+linear_x = twist_msg.linear.x;
+angular_z = twist_msg.angular.z;
+float wheel_radius = 0.05;
+float wheel_separation = 0.2;
+float left_vel = (linear_x - (angular_z * wheel_separation / 2.0)) / wheel_radius;
+float right_vel = (linear_x + (angular_z * wheel_separation / 2.0)) / wheel_radius;
+int left_pwm = map(left_vel * 100, -255, 255, -255, 255);
+int right_pwm = map(right_vel * 100, -255, 255, -255, 255);
+setMotorSpeed(MOTOR_LEFT_PWM1, MOTOR_LEFT_PWM2, left_pwm);
+setMotorSpeed(MOTOR_RIGHT_PWM1, MOTOR_RIGHT_PWM2, right_pwm);
 }
 
 void setMotorSpeed(int pwm_pin1, int pwm_pin2, int speed) {
- speed = constrain(speed, -255, 255);
- if(speed > 0) {
-  analogWrite(pwm_pin1, speed);
-  analogWrite(pwm_pin2, 0);
- } else if(speed < 0) {
-  analogWrite(pwm_pin1, 0);
-  analogWrite(pwm_pin2, -speed);
- } else {
-  analogWrite(pwm_pin1, 0);
-  analogWrite(pwm_pin2, 0);
- }
+speed = constrain(speed, -255, 255);
+if(speed > 0) {
+analogWrite(pwm_pin1, speed);
+analogWrite(pwm_pin2, 0);
+} else if(speed < 0) {
+analogWrite(pwm_pin1, 0);
+analogWrite(pwm_pin2, -speed);
+} else {
+analogWrite(pwm_pin1, 0);
+analogWrite(pwm_pin2, 0);
+}
 }
 
 void handleLeftEncoder() {
- left_ticks += (digitalRead(ENCODER_LEFT_B)) ? (digitalRead(ENCODER_LEFT_A) ? -1 : 1) : (digitalRead(ENCODER_LEFT_A) ? 1 : -1);
+left_ticks += (digitalRead(ENCODER_LEFT_B)) ? (digitalRead(ENCODER_LEFT_A) ? -1 : 1) : (digitalRead(ENCODER_LEFT_A) ? 1 : -1);
 }
 
 void handleRightEncoder() {
- right_ticks += (digitalRead(ENCODER_RIGHT_B)) ? (digitalRead(ENCODER_RIGHT_A) ? 1 : -1) : (digitalRead(ENCODER_RIGHT_A) ? -1 : 1);
+right_ticks += (digitalRead(ENCODER_RIGHT_B)) ? (digitalRead(ENCODER_RIGHT_A) ? 1 : -1) : (digitalRead(ENCODER_RIGHT_A) ? -1 : 1);
 }
 
 void setupRangeMessage(sensor_msgs::Range &range_msg, const char *frame_id) {
- range_msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
- range_msg.header.frame_id = frame_id;
- range_msg.field_of_view = 0.26; // ~15 grados
- range_msg.min_range = 0.02;   // 2cm
- range_msg.max_range = 2.0;   // 2m
+range_msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
+range_msg.header.frame_id = frame_id;
+range_msg.field_of_view = 0.26; // ~15 grados
+range_msg.min_range = 0.02; // 2cm
+range_msg.max_range = 2.0;  // 2m
 }
 
 void readAndPublishUltrasonic(NewPing &sonar, sensor_msgs::Range &range_msg, ros::Publisher &publisher) {
- unsigned int cm = sonar.ping_cm();
- range_msg.range = cm / 100.0; // Convertir a metros
- range_msg.header.stamp = nh.now();
- publisher.publish(&range_msg);
+unsigned int cm = sonar.ping_cm();
+range_msg.range = cm / 100.0; // Convertir a metros
+range_msg.header.stamp = nh.now();
+publisher.publish(&range_msg);
 }
 
 void activaBarredora() {
- digitalWrite(inAPin, LOW);
- digitalWrite(inBPin, HIGH);
- analogWrite(pwMPin, 255); // Ajustar velocidad PWM si es necesario
+digitalWrite(inAPin, LOW);
+digitalWrite(inBPin, HIGH);
+analogWrite(pwMPin, 255); // Ajustar velocidad PWM si es necesario
 }
 
 void desactivaBarredora() {
- digitalWrite(inAPin, LOW);
- digitalWrite(inBPin, LOW);
- analogWrite(pwMPin, 0);
+digitalWrite(inAPin, LOW);
+digitalWrite(inBPin, LOW);
+analogWrite(pwMPin, 0);
 }
 
 void barredoraCallback(const std_msgs::Bool& msg) {
- if (msg.data) {
-  activaBarredora();
-  Serial.println("Barredora activada.");
- } else {
-  desactivaBarredora();
-  Serial.println("Barredora desactivada.");
- }
+if (msg.data) {
+activaBarredora();
+Serial.println("Barredora activada.");
+} else {
+desactivaBarredora();
+Serial.println("Barredora desactivada.");
+}
 }
