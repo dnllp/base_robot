@@ -1,0 +1,11 @@
+Instalar gmapping
+
+sudo apt update
+sudo apt install ros-melodic-gmapping
+sudo apt install ros-melodic-navigation
+
+crear archivo launch mapping.launch
+
+
+
+
