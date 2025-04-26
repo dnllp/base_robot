@@ -186,46 +186,48 @@ delayMicroseconds(100);
 }
 
 void publishSensorData() {
-// --- Leer IMU ---
-imu::Quaternion quat = bno.getQuat();
-imu::Vector(float) linear_acceleration = bno.getLinearAccel();
-imu::Vector(float) angular_velocity = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+  // --- Leer IMU ---
+  imu::Quaternion quat = bno.getQuat();
+  
+  //imu::Vector<float> linear_acceleration = bno.getLinearAccel();
+  imu::Vector<3> linear_acceleration = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
+  imu::Vector<3> angular_velocity = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
 
-// --- Llenar el mensaje IMU ---
-imu_msg.header.stamp = nh.now();
-imu_msg.header.frame_id = "imu_frame";
-imu_msg.orientation.x = quat.x();
-imu_msg.orientation.y = quat.y();
-imu_msg.orientation.z = quat.z();
-imu_msg.orientation.w = quat.w();
-for (int i = 0; i < 9; i++) {
-imu_msg.orientation_covariance[i] = 0.0;
-imu_msg.angular_velocity_covariance[i] = 0.0;
-imu_msg.linear_acceleration_covariance[i] = 0.0;
-}
-imu_msg.angular_velocity.x = angular_velocity.x();
-imu_msg.angular_velocity.y = angular_velocity.y();
-imu_msg.angular_velocity.z = angular_velocity.z();
-imu_msg.linear_acceleration.x = linear_acceleration.x();
-imu_msg.linear_acceleration.y = linear_acceleration.y();
-imu_msg.linear_acceleration.z = linear_acceleration.z();
-imu_pub.publish(&imu_msg);
+  // --- Llenar el mensaje IMU ---
+  imu_msg.header.stamp = nh.now();
+  imu_msg.header.frame_id = "imu_frame";
+  imu_msg.orientation.x = quat.x();
+  imu_msg.orientation.y = quat.y();
+  imu_msg.orientation.z = quat.z();
+  imu_msg.orientation.w = quat.w();
+  for (int i = 0; i < 9; i++) {
+    imu_msg.orientation_covariance[i] = 0.0;
+    imu_msg.angular_velocity_covariance[i] = 0.0;
+    imu_msg.linear_acceleration_covariance[i] = 0.0;
+  }
+  imu_msg.angular_velocity.x = angular_velocity.x();
+  imu_msg.angular_velocity.y = angular_velocity.y();
+  imu_msg.angular_velocity.z = angular_velocity.z();
+  imu_msg.linear_acceleration.x = linear_acceleration.x();
+  imu_msg.linear_acceleration.y = linear_acceleration.y();
+  imu_msg.linear_acceleration.z = linear_acceleration.z();
+  imu_pub.publish(&imu_msg);
 
-// --- Calcular y publicar datos del encoder ---
-long delta_left = left_ticks - prev_left_ticks;
-long delta_right = right_ticks - prev_right_ticks;
-prev_left_ticks = left_ticks;
-prev_right_ticks = right_ticks;
-encoder_msg.data[0] = delta_left;
-encoder_msg.data[1] = delta_right;
-encoder_pub.publish(&encoder_msg);
+  // --- Calcular y publicar datos del encoder ---
+  long delta_left = left_ticks - prev_left_ticks;
+  long delta_right = right_ticks - prev_right_ticks;
+  prev_left_ticks = left_ticks;
+  prev_right_ticks = right_ticks;
+  encoder_msg.data[0] = delta_left;
+  encoder_msg.data[1] = delta_right;
+  encoder_pub.publish(&encoder_msg);
 }
 
 void velocity_cb(const geometry_msgs::Twist& twist_msg) {
 linear_x = twist_msg.linear.x;
 angular_z = twist_msg.angular.z;
-float wheel_radius = 0.05;
-float wheel_separation = 0.2;
+float wheel_radius = 0.065;
+float wheel_separation = 0.42;
 float left_vel = (linear_x - (angular_z * wheel_separation / 2.0)) / wheel_radius;
 float right_vel = (linear_x + (angular_z * wheel_separation / 2.0)) / wheel_radius;
 int left_pwm = map(left_vel * 100, -255, 255, -255, 255);
@@ -261,7 +263,7 @@ range_msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
 range_msg.header.frame_id = frame_id;
 range_msg.field_of_view = 0.26; // ~15 grados
 range_msg.min_range = 0.02; // 2cm
-range_msg.max_range = 2.0;  // 2m
+range_msg.max_range = 2.0; //  2m
 }
 
 void readAndPublishUltrasonic(NewPing &sonar, sensor_msgs::Range &range_msg, ros::Publisher &publisher) {
@@ -272,8 +274,8 @@ publisher.publish(&range_msg);
 }
 
 void activaBarredora() {
-digitalWrite(inAPin, LOW);
-digitalWrite(inBPin, HIGH);
+digitalWrite(inAPin, HIGH);
+digitalWrite(inBPin, LOW);
 analogWrite(pwMPin, 255); // Ajustar velocidad PWM si es necesario
 }
 
