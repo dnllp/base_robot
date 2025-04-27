@@ -8,7 +8,7 @@ from cv_bridge import CvBridge
 import cv2
 import numpy as np
 import actionlib
-from mi_robot.msg import BuscarLataAction, BuscarLataResult, BuscarLataFeedback
+from base_robot.msg import BuscarLataAction, BuscarLataResult, BuscarLataFeedback
 
 class ImprovedBlackCanActionServer:
     def __init__(self):
