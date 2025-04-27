@@ -4,7 +4,7 @@ import numpy as np
 from sensor_msgs.msg import LaserScan, Range
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
-from mi_robot.srv import EvadirObstaculo, EvadirObstaculoResponse
+from base_robot.srv import EvadirObstaculo, EvadirObstaculoResponse
 from enum import Enum
 
 class EvasionState(Enum):

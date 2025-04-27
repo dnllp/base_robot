@@ -8,7 +8,7 @@ from std_msgs.msg import Int8
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
-from mi_robot.srv import BuscarLata, BuscarLataResponse
+from base_robot.srv import BuscarLata, BuscarLataResponse
 
 class ImprovedBlackCanService:
     def __init__(self):

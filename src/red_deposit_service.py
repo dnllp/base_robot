@@ -8,7 +8,7 @@ from std_msgs.msg import Bool, Float32
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
-from mi_robot.srv import BuscarDescargar, BuscarDescargarResponse
+from base_robot.srv import BuscarDescargar, BuscarDescargarResponse
 from enum import Enum
 
 class State(Enum):
