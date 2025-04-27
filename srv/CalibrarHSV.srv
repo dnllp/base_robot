@@ -1,0 +1,13 @@
+# Request
+int32 comando  # 1=mostrar valores actuales, 2=actualizar valores
+float32 h_min
+float32 s_min
+float32 v_min
+float32 h_max
+float32 s_max
+float32 v_max
+
+# Response
+float32[] actual  # Valores actuales [h_min, s_min, v_min, h_max, s_max, v_max]
+bool success
+string message
