@@ -1,0 +1,12 @@
+# BuscarLata.action
+# ---
+# Goal: No arguments needed for this action
+---
+# Result:
+bool lata_encontrada
+float32 centro_x
+---
+# Feedback:
+# You could potentially add feedback like the current search state or
+# the perceived distance/angle to the can if you were implementing that.
+# For this basic example, we'll keep feedback empty.

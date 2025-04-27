@@ -21,6 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   geometry_msgs
   #cv_bridge
+  actionlib
+  actionlib_msgs
   message_generation
 )
 
@@ -31,11 +33,17 @@ add_service_files(
   EvadirObstaculo.srv # Agrega tu nuevo servicio aquí
 )
 
+add_action_files(
+  FILES
+  BuscarLata.action
+)
+
 generate_messages(
   DEPENDENCIES
   std_msgs
   sensor_msgs
   geometry_msgs
+  actionlib_msgs
 )
 
 catkin_package(
@@ -68,6 +76,7 @@ install(FILES
   src/black_can_service.py
   src/obstacle_avoidance_service.py # Agrega tu nuevo nodo de servicio
   src/state_machine.py
+  scripts/improved_black_can_action.py 
   DESTINATION ${CATKIN_PACKAGE_PACKAGE_DESTINATION}/nodes
   PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
 )
